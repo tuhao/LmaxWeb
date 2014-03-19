@@ -34,7 +34,7 @@ public class TradeServlet extends HttpServlet{
 		try {
 			long instrumentId = Long.parseLong(strInstrumentId);
 			out = resp.getWriter();
-			out.print(SessionListener.getLmaxThread().orderBookEventMap.get(instrumentId));
+			out.print(SessionListener.getInstance().orderBookEventMap.get(instrumentId));
 		} catch (Exception e) {
 			// TODO: handle exception
 			log.error(e);

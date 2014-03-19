@@ -28,7 +28,7 @@ public class AccountServlet extends HttpServlet{
 		PrintWriter out = null;
 		try{
 			out = resp.getWriter();
-			String account = SessionListener.getLmaxThread().accountInfo + "\n" + SessionListener.getLmaxThread().positionInfo;
+			String account = SessionListener.getInstance().accountInfo + "\n" + SessionListener.getInstance().positionInfo;
 			out.print(account);
 		}catch (Exception e) {
 			// TODO: handle exception

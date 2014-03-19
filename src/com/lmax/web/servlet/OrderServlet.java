@@ -29,8 +29,8 @@ public class OrderServlet extends HttpServlet {
 		PrintWriter out = null;
 		try{
 			StringBuffer sb = new StringBuffer("");
-			for(String key:SessionListener.getLmaxThread().orderMap.keySet()){
-				sb.append(SessionListener.getLmaxThread().orderMap.get(key)).append("\n");
+			for(String key:SessionListener.getInstance().orderMap.keySet()){
+				sb.append(SessionListener.getInstance().orderMap.get(key)).append("\n");
 			}
 			out = resp.getWriter();
 			out.print(sb.toString());

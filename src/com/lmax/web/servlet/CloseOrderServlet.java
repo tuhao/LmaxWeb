@@ -39,7 +39,7 @@ public class CloseOrderServlet extends HttpServlet{
 		PrintWriter out = null;
 		try{
 			out = resp.getWriter();
-			out.print(SessionListener.getLmaxThread().closeOrder(instructionId, Long.parseLong(instrumentId), Long.parseLong(quantity)));
+			out.print(SessionListener.getInstance().closeOrder(instructionId, Long.parseLong(instrumentId), Long.parseLong(quantity)));
 		}catch (Exception e) {
 			// TODO: handle exception
 			log.error(e);

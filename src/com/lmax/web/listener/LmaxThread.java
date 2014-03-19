@@ -1,10 +1,7 @@
 package com.lmax.web.listener;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,7 +11,6 @@ import com.lmax.api.FailureResponse;
 import com.lmax.api.FixedPointNumber;
 import com.lmax.api.LmaxApi;
 import com.lmax.api.Session;
-import com.lmax.api.SessionDisconnectedListener;
 import com.lmax.api.SubscriptionRequest;
 import com.lmax.api.TimeInForce;
 import com.lmax.api.account.AccountStateEvent;
@@ -26,7 +22,6 @@ import com.lmax.api.account.LoginRequest.ProductType;
 import com.lmax.api.order.ClosingOrderSpecification;
 import com.lmax.api.order.MarketOrderSpecification;
 import com.lmax.api.order.Order;
-import com.lmax.api.order.OrderCallback;
 import com.lmax.api.order.OrderEventListener;
 import com.lmax.api.order.OrderSubscriptionRequest;
 import com.lmax.api.orderbook.Instrument;
@@ -38,6 +33,8 @@ import com.lmax.api.orderbook.SearchInstrumentRequest;
 import com.lmax.api.position.PositionEvent;
 import com.lmax.api.position.PositionEventListener;
 import com.lmax.api.position.PositionSubscriptionRequest;
+import com.lmax.util.ActionCallback;
+import com.lmax.util.CurrentOrder;
 
 public class LmaxThread extends Thread implements LoginCallback,OrderBookEventListener,OrderEventListener,PositionEventListener,AccountStateEventListener{
 	
@@ -45,28 +42,21 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		private String username;
 		private String password;
 		private ProductType productType;
-		private SessionDisconnectedListener sessionDisconnectedListener;
+		private SessionListener sessionListener;
 		
 		private Session session = null;
 		
 		private List<Long> instrumentIds = new LinkedList<Long>();
 		
 		private static Log log = LogFactory.getLog(LmaxThread.class);
-		
-		public Map<Long, OrderBookEvent> orderBookEventMap = Collections.synchronizedMap(new HashMap<Long, OrderBookEvent>());
-		
-		public Map<String,Order> orderMap = Collections.synchronizedMap(new HashMap<String,Order>());
-		
-		public String positionInfo;
-		public String accountInfo;
 
 		public LmaxThread(String url, String username, String password,
-				String demo,SessionDisconnectedListener sessionDisconnectedListener) {
+				String demo,SessionListener sessionListener) {
 			this.url = url;
 			this.username = username;
 			this.password = password;
 			this.productType = ProductType.valueOf(demo);
-			this.sessionDisconnectedListener = sessionDisconnectedListener;
+			this.sessionListener = sessionListener;
 		}
 		
 
@@ -88,7 +78,7 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		public void onLoginSuccess(Session session) {
 			// TODO Auto-generated method stub
 			this.session = session;
-			session.registerSessionDisconnectedListener(sessionDisconnectedListener);
+			session.registerSessionDisconnectedListener(sessionListener);
 			
 			session.registerOrderEventListener(this);
 			subscribe(session, new OrderSubscriptionRequest(), "Orders");
@@ -98,7 +88,6 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 			
 			session.registerAccountStateEventListener(this);
 			subscribe(session, new AccountSubscriptionRequest(), "Account Updates");
-			
 			
 			session.registerOrderBookEventListener(this);
 			loadAllInstruments();
@@ -149,32 +138,17 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		@Override
 		public void notify(OrderBookEvent orderBookEvent) {
 			// TODO Auto-generated method stub
-			orderBookEventMap.put(orderBookEvent.getInstrumentId(), orderBookEvent);
+			sessionListener.orderBookEventMap.put(orderBookEvent.getInstrumentId(), orderBookEvent);
 		}
 		
 		/**
 		 * 
 		 * @param instrumentId
 		 * @param quantity
-		 * @return
+		 * @param sessionListener
 		 */
-		public String placeOrder(long instrumentId,long quantity){
-			 OrderCallback orderCallback = new OrderCallback(){
-					@Override
-					public void onFailure(FailureResponse arg0) {
-						// TODO Auto-generated method stub
-						log.error(arg0);
-					}
-
-					@Override
-					public void onSuccess(String arg0) {
-						// TODO Auto-generated method stub
-						log.info(arg0);
-					}
-					
-				};
-			session.placeMarketOrder(new MarketOrderSpecification(instrumentId,FixedPointNumber.valueOf(quantity),TimeInForce.IMMEDIATE_OR_CANCEL), orderCallback);
-			return "True";
+		public void placeOrder(long instrumentId,long quantity,final ActionCallback actionCallback){
+			session.placeMarketOrder(new MarketOrderSpecification(instrumentId,FixedPointNumber.valueOf(quantity),TimeInForce.IMMEDIATE_OR_CANCEL), actionCallback);
 		}
 		
 		/**
@@ -182,29 +156,14 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		 * @param instructionId
 		 * @param instrumentId
 		 * @param quantity
-		 * @return
+		 * @param sessionListener
 		 */
-		public String closeOrder(String instructionId,long instrumentId,long quantity){
-			OrderCallback orderCallback = new OrderCallback(){
-
-				@Override
-				public void onFailure(FailureResponse arg0) {
-					// TODO Auto-generated method stub
-					log.error(arg0);
-				}
-
-				@Override
-				public void onSuccess(String arg0) {
-					// TODO Auto-generated method stub
-					log.info(arg0);
-				}
-				
-			};
-			session.placeClosingOrder(new ClosingOrderSpecification(instructionId.concat("0"),instrumentId,instructionId,FixedPointNumber.valueOf(quantity)), orderCallback);
-			return "True";
+		public void closeOrder(String instructionId,long instrumentId,long quantity,ActionCallback actionCallback){
+			session.placeClosingOrder(new ClosingOrderSpecification(instructionId.concat("0"),instrumentId,instructionId,FixedPointNumber.valueOf(quantity)), actionCallback);
+			
 		}
 		
-		  private void subscribe(final Session session, final SubscriptionRequest request, final String subscriptionDescription)
+		private void subscribe(final Session session, final SubscriptionRequest request, final String subscriptionDescription)
 		    {
 		        session.subscribe(request,new Callback()
 		        {
@@ -224,16 +183,26 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 
 
 		@Override
-		public void notify(Order order) {
+		public void notify(Order o) {
 			// TODO Auto-generated method stub
-			log.info(order);
-			String key = order.getInstructionId();
-			if(!orderMap.containsKey(key)){
-				orderMap.put(order.getInstructionId(),order);
+			log.info(o);
+			String key = o.getInstructionId();
+			String originId = key.substring(0, key.length() - 1);
+			CurrentOrder order = sessionListener.orderMap.get(originId);
+			if(order != null){
+				if(Math.abs(o.getQuantity().longValue()) >= Math.abs(order.getCurrentQuantity().longValue())){
+					sessionListener.orderMap.remove(originId);
+				}else{
+					order.setCurrentQuantity(FixedPointNumber.valueOf(o.getQuantity().longValue() + order.getCurrentQuantity().longValue()));
+					sessionListener.orderMap.put(originId, order);
+				}
 			}else{
-//				if(Math.abs(orderMap.get(key).getQuantity().longValue()) <= Math.abs(order.getQuantity().longValue())){
-				orderMap.remove(key);
-//				}
+				CurrentOrder currentOrder = new CurrentOrder(o.getOriginalInstructionId(),o.getInstructionId(),
+						o.getOrderId(),o.getInstrumentId(),o.getAccountId(),o.getOrderType(),o.getTimeInForce(),
+						o.getQuantity(),o.getFilledQuantity(),o.getCancelledQuantity(),o.getLimitPrice(),
+						o.getStopReferencePrice(),o.getStopLossOffset(),o.getStopProfitOffset(),o.getCommission());
+				currentOrder.setCurrentQuantity(o.getQuantity());
+				sessionListener.orderMap.put(key, currentOrder);
 			}
 		}
 
@@ -243,7 +212,7 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		public void notify(final PositionEvent positionEvent) {
 			// TODO Auto-generated method stub
 			log.info(positionEvent);
-			this.positionInfo = positionEvent.toString();
+			sessionListener.positionInfo = positionEvent.toString();
 		}
 
 
@@ -252,7 +221,7 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		public void notify(AccountStateEvent accountStateEvent) {
 			// TODO Auto-generated method stub
 			log.info(accountStateEvent);
-			this.accountInfo = accountStateEvent.toString();
+			sessionListener.accountInfo = accountStateEvent.toString();
 		}
 
 }
