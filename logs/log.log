@@ -1,0 +1,16 @@
+2014-03-12 15:37:09  [ main:0 ] - [ INFO ]  This is an info.
+2014-03-12 15:37:09  [ main:1 ] - [ WARN ]  This is a warning.
+2014-03-12 15:37:09  [ main:1 ] - [ ERROR ]  This is an error.
+2014-03-12 15:37:09  [ main:1 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:37:56  [ main:0 ] - [ INFO ]  This is an info.
+2014-03-12 15:37:56  [ main:1 ] - [ WARN ]  This is a warning.
+2014-03-12 15:37:56  [ main:1 ] - [ ERROR ]  This is an error.
+2014-03-12 15:37:56  [ main:1 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:39:01  [ main:0 ] - [ INFO ]  This is an info.
+2014-03-12 15:39:01  [ main:0 ] - [ WARN ]  This is a warning.
+2014-03-12 15:39:01  [ main:0 ] - [ ERROR ]  This is an error.
+2014-03-12 15:39:01  [ main:0 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:51:14  [ main:0 ] - [ INFO ]  This is an info.
+2014-03-12 15:51:14  [ main:0 ] - [ WARN ]  This is a warning.
+2014-03-12 15:51:14  [ main:0 ] - [ ERROR ]  This is an error.
+2014-03-12 15:51:14  [ main:1 ] - [ FATAL ]  This is a fatal error.

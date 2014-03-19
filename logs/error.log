@@ -1,0 +1,10 @@
+2014-03-12 15:36:14  [ main:16 ] - [ ERROR ]  This is an error.
+2014-03-12 15:36:14  [ main:17 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:37:09  [ main:1 ] - [ ERROR ]  This is an error.
+2014-03-12 15:37:09  [ main:1 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:37:56  [ main:1 ] - [ ERROR ]  This is an error.
+2014-03-12 15:37:56  [ main:1 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:39:01  [ main:0 ] - [ ERROR ]  This is an error.
+2014-03-12 15:39:01  [ main:0 ] - [ FATAL ]  This is a fatal error.
+2014-03-12 15:51:14  [ main:0 ] - [ ERROR ]  This is an error.
+2014-03-12 15:51:14  [ main:1 ] - [ FATAL ]  This is a fatal error.
