@@ -20,6 +20,7 @@ import com.lmax.api.account.LoginCallback;
 import com.lmax.api.account.LoginRequest;
 import com.lmax.api.account.LoginRequest.ProductType;
 import com.lmax.api.order.ClosingOrderSpecification;
+import com.lmax.api.order.LimitOrderSpecification;
 import com.lmax.api.order.MarketOrderSpecification;
 import com.lmax.api.order.Order;
 import com.lmax.api.order.OrderEventListener;
@@ -150,6 +151,18 @@ public class LmaxThread extends Thread implements LoginCallback,OrderBookEventLi
 		public void placeOrder(long instrumentId,long quantity,final ActionCallback actionCallback){
 			session.placeMarketOrder(new MarketOrderSpecification(instrumentId,FixedPointNumber.valueOf(quantity),TimeInForce.IMMEDIATE_OR_CANCEL), actionCallback);
 		}
+		
+		/**
+		 * @param instrumentId
+		 * @param price
+		 * @param quantity
+		 * @param actionCallback
+		 */
+		public void placeLimiteOrder(long instrumentId,String price,long quantity,final ActionCallback actionCallback){
+			session.placeLimitOrder(new LimitOrderSpecification(instrumentId, FixedPointNumber.valueOf(price), FixedPointNumber.valueOf(quantity), TimeInForce.IMMEDIATE_OR_CANCEL), actionCallback);
+			
+		}
+		
 		
 		/**
 		 * 

@@ -44,6 +44,12 @@ public class SessionListener implements ServletContextListener,SessionDisconnect
 		return actionCallback.result;
 	}
 	
+	public String placeLimitOrder(long instrumentId,String price,long quantity){
+		ActionCallback actionCallback = new ActionCallback();
+		lmaxThread.placeLimiteOrder(instrumentId, price,quantity,actionCallback);
+		return actionCallback.result;
+	}
+	
 	public String closeOrder(String instructionId,long instrumentId,long quantity){
 		ActionCallback actionCallback = new ActionCallback();
 		lmaxThread.closeOrder(instructionId, instrumentId, quantity,actionCallback);

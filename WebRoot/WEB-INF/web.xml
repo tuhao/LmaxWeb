@@ -54,6 +54,15 @@
   <url-pattern>/Account</url-pattern>
   </servlet-mapping>
   
+   <servlet>
+  <servlet-name>PlaceLimitOrder</servlet-name>
+  <servlet-class>com.lmax.web.servlet.PlaceLimitOrderServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  <servlet-name>PlaceLimitOrder</servlet-name>
+  <url-pattern>/PlaceLimitOrder</url-pattern>
+  </servlet-mapping>
+  
   <listener>
      <listener-class>com.lmax.web.listener.SessionListener</listener-class>
   </listener>
